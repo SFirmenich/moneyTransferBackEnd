@@ -1,7 +1,7 @@
 Ejecutar proyecto
 =================
 El proyeto esta dockerizado, incluyendo django, postgres, redis y celery.
-Para ejecutar el proyecto ejecutar:
+Para ejecutar el proyecto:
 1. docker-compose build
 2. docker-compose up
 
