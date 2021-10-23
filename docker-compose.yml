@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+    container_name: djangoApp
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=dbapp
+      - DB_USER=postgres
+      - DB_PASS=secret
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:10-alpine
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=dbapp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+
+  celery:
+    build:
+      context: .
+    container_name: celery
+    command: celery worker --app=app --loglevel=INFO
+    environment:
+      - DB_HOST=db
+      - DB_NAME=dbapp
+      - DB_USER=postgres
+      - DB_PASS=secret
+    volumes:
+      - ./app:/app
+    depends_on:
+      - app
+      - redis
+      - db
+
+  redis:
+    image: redis:alpine
+    container_name: redis
