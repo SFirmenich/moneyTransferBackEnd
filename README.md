@@ -14,7 +14,8 @@ docker-compose run app python manage.py create_example
 Este comando creará:
 * Monedas: Bitcoin, Dolar, Peso, Ethereum
 * Usuarios: un super usuario admin.user@challenge.com (password:password123) con acceso a la administración, dos usuarios sin acceso a la administracion: simple.user@challenge.com (password: supersecret), simple.user2@challenge.com (password: supersecret)
-* Creará movimientos para que el usuario admin.user@challenge.com tenga balance positivo: 1000 Dolar, 10 Bitcoin, 50 Ethereum, 50000 Pesos
+* Creará movimientos para que el usuario admin.user@challenge.com tenga balance positivo: 1000 Dolar, 10 Bitcoin, 50 Ethereum, 50000 Pesos.
+
 De todas maneras pueden crearse nuevos usuarios utilizando el endpoint correspondiente:
 
 http://localhost:8000/api/users/create/
@@ -27,7 +28,7 @@ Las transacciones modelan el intento de transferencia de dinero de una cuenta a 
 
 No hay endpoint para cambiar directamente el balance de un usuario, pero ingresando a la administración de django pueden crearse movimientos para un usuario indicando la moneda en pos de posibilitar futuras transacciones. Para darle balance positivo en una momeda determinada a un usuario se debe crear un movimiento desde la administración. Esto es una decision de diseño que acota la implementación a lo estrictamente solicitado, considerando que en una aplicación realista habría un broker donde los usuarios puedan comprar moneda.
 
-Las transacciones son manejadas por una cola de trabajo de Celery para garantizar que no haya problemas por concurrencia. Para garantizar esto se acude a un lock de tarea que minimiza las transacciones bloqueadas utilizando como id de lock el string "{user_id}-lock-{moneda_id}", de esta manera solo serán bloquedas aquellas transacciones para las que existe otra transacción siendo procesada para la misma cuenta origen y la misma moneda. Se reintenta el procesamiento de la transacción bloqueda luego de 10 segundos.
+Las transacciones son manejadas por una cola de trabajo de Celery para garantizar que no haya problemas por concurrencia. Para garantizar esto se acude a un lock de tarea que minimiza las transacciones bloqueadas utilizando como id de lock el string "{user_id}-lock-{moneda_id}", de esta manera solo serán bloqueadas aquellas transacciones para las que existe otra transacción siendo procesada para la misma cuenta origen y la misma moneda. Se reintenta el procesamiento de la transacción bloqueada luego de 10 segundos.
 
 Si una transacción es procesada satisfactoriamente, se crearan dos movimientos, uno para la cuenta de origen (con monto negativo) y otro para la cuenta destino (con monto positivo). Si el monto indicado por una transacción es mayor al balance del usuario para la moneda correspondiente, la transacción queda rechazada y no se crean movimientos.
 
