@@ -4,7 +4,10 @@ El proyeto esta dockerizado, incluyendo django, postgres, redis y celery.
 Para ejecutar el proyecto:
 1. docker-compose build
 2. docker-compose up
-3. docker-compose run app python manage.py makemigrations
+
+Al levantar el proyecto se deberian aplicar automaticamente las migraciones iniciales de cada aplicación. Si ocurre algun problema con esto, ejecutar:
+
+docker-compose run app python manage.py makemigrations
 
 Ejemplo de prueba
 =================
@@ -20,6 +23,7 @@ Este comando creará:
 De todas maneras pueden crearse nuevos usuarios utilizando el endpoint correspondiente:
 
 http://localhost:8000/api/users/create/
+
 
 
 Explicación del funcionamiento
