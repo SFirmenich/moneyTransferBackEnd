@@ -4,6 +4,7 @@ El proyeto esta dockerizado, incluyendo django, postgres, redis y celery.
 Para ejecutar el proyecto:
 1. docker-compose build
 2. docker-compose up
+3. docker-compose run app python manage.py makemigrations
 
 Ejemplo de prueba
 =================
