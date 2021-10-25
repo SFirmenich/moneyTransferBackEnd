@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import transaction
 from coins.models import Coin
 from core.models import Movement
 from django.conf import settings
@@ -39,10 +40,11 @@ class Transaction(models.Model):
 
     def process(self):
         if self.state == PENDING:
-            if self.origin.balance_by_coin(self.coin) >= self.amount:
-                self.origin.add_account_movement(self.amount*-1,self.coin)
-                self.destiny.add_account_movement(self.amount,self.coin)
-                self.state = APPROVED
-            else:
-                self.state = REJECTED
-            self.save()
+            with transaction.atomic():
+                if self.origin.balance_by_coin(self.coin) >= self.amount:
+                    self.origin.add_account_movement(self.amount*-1,self.coin)
+                    self.destiny.add_account_movement(self.amount,self.coin)
+                    self.state = APPROVED
+                else:
+                    self.state = REJECTED
+                self.save()
